@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "HostFree Session Sync",
+  "version": "1.0.0",
+  "description": "Передаёт сессию hostgta в HostFree, чтобы автопродление работало без пароля.",
+  "permissions": ["cookies", "activeTab", "clipboardWrite"],
+  "host_permissions": [
+    "https://hostgta.ru/*",
+    "https://hostgta.com/*",
+    "https://*.hostgta.ru/*",
+    "https://*.hostgta.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "HostFree Session Sync"
+  }
+}
