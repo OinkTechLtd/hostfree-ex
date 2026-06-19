@@ -1,4 +1,9 @@
-const DOMAINS = [".hostgta.ru", "hostgta.ru", ".hostgta.com", "hostgta.com"];
+const DOMAINS = [
+  "hostgta.ru",
+  ".hostgta.ru",
+  "hostgta.com",
+  ".hostgta.com"
+];
 
 async function grab() {
   const status = document.getElementById("status");
@@ -10,10 +15,9 @@ async function grab() {
 
   for (const domain of DOMAINS) {
     try {
-      const cookies = await chrome.cookies.getAll({ 
-        domain: domain 
-      });
-      
+      const cookies = await chrome.cookies.getAll({ domain: domain });
+      console.log(`Для ${domain} найдено cookies:`, cookies.length); // для отладки
+
       if (cookies && cookies.length > 0) {
         collected[domain] = cookies.map(c => ({
           name: c.name,
@@ -23,17 +27,23 @@ async function grab() {
           expirationDate: c.expirationDate,
           secure: c.secure,
           httpOnly: c.httpOnly,
-          sameSite: c.sameSite
+          sameSite: c.sameSite || "lax"
         }));
         total += cookies.length;
       }
     } catch (e) {
-      console.warn(`Не удалось получить cookies для ${domain}`, e);
+      console.error(`Ошибка для ${domain}:`, e);
     }
   }
 
+  console.log("Всего cookies собрано:", total);
+
   if (total === 0) {
-    status.textContent = "Cookies не найдены. Открой hostgta.ru в этой вкладке и войди в аккаунт.";
+    status.innerHTML = `Cookies не найдены.<br><br>
+      <b>Что попробовать:</b><br>
+      1. Перезагрузи страницу hostgta.ru (F5)<br>
+      2. Убедись, что ты залогинен<br>
+      3. Перезагрузи расширение в chrome://extensions/`;
     status.className = "status err";
     return;
   }
@@ -47,11 +57,11 @@ async function grab() {
 
   try {
     await navigator.clipboard.writeText(payload);
-    status.textContent = `✅ Готово! Скопировано ${total} cookies. Вставь в HostFree → Импорт сессии`;
+    status.textContent = `✅ Успешно! Скопировано ${total} cookies. Вставляй в HostFree.`;
     status.className = "status ok";
   } catch (e) {
-    status.textContent = "Не удалось скопировать в буфер. Скопируй вручную:";
-    console.log(payload);
+    status.textContent = "Не удалось скопировать. Открой консоль (F12) и посмотри логи.";
+    console.log("Payload:", payload);
   }
 }
 
